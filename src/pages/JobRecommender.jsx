@@ -10,6 +10,10 @@ import {
   Grid,
   CircularProgress,
   Alert,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import WorkIcon from '@mui/icons-material/Work';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -21,9 +25,10 @@ const JobRecommender = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [modelo, setModelo] = useState('tfidf'); // nuevo estado para seleccionar modelo
 
   const sanitize = (text) => {
-  return text.includes('*') ? 'Información reservada' : text;
+    return text.includes('*') ? 'Información reservada' : text;
   };
 
   const handleSearch = async () => {
@@ -37,11 +42,10 @@ const JobRecommender = () => {
     setJobs([]);
 
     try {
-
-       const token = localStorage.getItem("token"); 
+      const token = localStorage.getItem("token");
 
       const response = await axios.post(
-        `${API_URL}/api/recomendacion/buscar`,
+        `${API_URL}/api/recomendacion/${modelo}`, // endpoint según modelo
         { text: inputText },
         {
           headers: {
@@ -76,6 +80,20 @@ const JobRecommender = () => {
         onChange={(e) => setInputText(e.target.value)}
         margin="normal"
       />
+
+      {/* Selector del modelo */}
+      <FormControl fullWidth margin="normal">
+        <InputLabel id="modelo-label">Modelo de Búsqueda</InputLabel>
+        <Select
+          labelId="modelo-label"
+          value={modelo}
+          label="Modelo de Búsqueda"
+          onChange={(e) => setModelo(e.target.value)}
+        >
+          <MenuItem value="tfidf">TF-IDF</MenuItem>
+          <MenuItem value="bert">BERT</MenuItem>
+        </Select>
+      </FormControl>
 
       <Button variant="contained" color="primary" onClick={handleSearch} disabled={loading}>
         {loading ? <CircularProgress size={24} /> : 'Buscar Empleos'}
